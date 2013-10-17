@@ -1,0 +1,1 @@
+{"serverName": "QA","logs":[{"appName":"app1", "logPath": "/var/log/app1.log"},{"appName":"app2", "logPath": "/var/log/app2.log"}]}

@@ -14,21 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package core
 
 import (
-	"flag"
 	"fmt"
-	logviewer "github.com/jijeshmohan/logviewer/core"
+	"io/ioutil"
+	"os"
 )
 
-var (
-	port       = flag.Int("p", 8080, "webserver port")
-	configfile = flag.String("c", "./config.json", "configuration json file")
-)
+func ReadFile(filepath string) []byte {
+	data, err := ioutil.ReadFile(filepath)
+	checkError(err, "Unable to read file")
+	return data
+}
 
-func main() {
-	flag.Parse()
-	config := logviewer.GetConfig(*configfile)
-	fmt.Println(config.ServerName)
+func checkError(err error, msg string) {
+	if err != nil {
+		fmt.Errorf(msg)
+		os.Exit(2)
+	}
 }

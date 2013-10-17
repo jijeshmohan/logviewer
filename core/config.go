@@ -14,23 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package core
 
 import (
-	"testing"
+	"encoding/json"
 )
 
-func TestConfigDecoding(t *testing.T) {
-	json := []byte(`{"serverName": "QA","logs":[{"appName":"app1", "logPath": "/var/log/app1.log"},{"appName":"app2", "logPath": "/var/log/app2.log"}]}`)
-	c := GetConfig(json)
-	if c.ServerName != "QA" {
-		t.Fatal("Invalid Server name")
-	}
-	if len(c.Logs) != 2 {
-		t.Fatal("Invalid Logs count")
-	}
+type Config struct {
+	ServerName string `json:"serverName"`
+	Logs       []Log  `json:"logs"`
+}
 
-	if c.Logs[0].Appname != "app1" {
-		t.Fatalf("Invalid app name : %s", c.Logs[0].Appname)
-	}
+type Log struct {
+	Appname string `json:"appName"`
+	LogPath string `json:"logPath"`
+}
+
+func GetConfig(configfile string) Config {
+	data := ReadFile(configfile)
+	return parseConfigData(data)
+}
+
+func parseConfigData(data []byte) Config {
+	var config Config
+	err := json.Unmarshal(data, &config)
+	checkError(err, "Unable to parse json file")
+	return config
 }

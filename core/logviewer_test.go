@@ -14,27 +14,24 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package core
 
 import (
-	"encoding/json"
+	"testing"
 )
 
-type Config struct {
-	ServerName string `json:"serverName"`
-	Logs       []Log  `json:"logs"`
-}
+func TestConfigDecoding(t *testing.T) {
 
-type Log struct {
-	Appname string `json:"appName"`
-	LogPath string `json:"logPath"`
-}
-
-func GetConfig(data []byte) Config {
-	var config Config
-	err := json.Unmarshal(data, &config)
-	if err != nil {
-		panic("Unable to parse config data")
+	json := []byte(`{"serverName": "QA","logs":[{"appName":"app1", "logPath": "/var/log/app1.log"},{"appName":"app2", "logPath": "/var/log/app2.log"}]}`)
+	c := parseConfigData(json)
+	if c.ServerName != "QA" {
+		t.Fatal("Invalid Server name")
 	}
-	return config
+	if len(c.Logs) != 2 {
+		t.Fatal("Invalid Logs count")
+	}
+
+	if c.Logs[0].Appname != "app1" {
+		t.Fatalf("Invalid app name : %s", c.Logs[0].Appname)
+	}
 }
