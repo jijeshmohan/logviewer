@@ -17,19 +17,85 @@ limitations under the License.
 package web
 
 import (
+	"code.google.com/p/go.net/websocket"
 	"fmt"
+	"github.com/jijeshmohan/logviewer/core"
 	"log"
 	"net/http"
 	"text/template"
-  "github.com/jijeshmohan/logviewer/core"
 )
+
+type connection struct {
+	ws   *websocket.Conn
+	send chan string
+}
+
+type room struct {
+	connections map[*connection]bool
+	broadcast   chan string
+	register    chan *connection
+	unregister  chan *connection
+}
+
+var r = room{
+	broadcast:   make(chan string),
+	register:    make(chan *connection),
+	unregister:  make(chan *connection),
+	connections: make(map[*connection]bool),
+}
+
+func (r *room) run() {
+	for {
+		select {
+		case c := <-r.register:
+			r.connections[c] = true
+		case c := <-r.unregister:
+			delete(r.connections, c)
+			close(c.send)
+		case m := <-r.broadcast:
+			for c := range r.connections {
+				select {
+				case c.send <- m:
+				default:
+					delete(r.connections, c)
+					close(c.send)
+					go c.ws.Close()
+				}
+			}
+		}
+	}
+}
+
+func (c *connection) reader() {
+	for {
+		var message string
+		err := websocket.Message.Receive(c.ws, &message)
+		if err != nil {
+			break
+		}
+		r.broadcast <- message
+	}
+	c.ws.Close()
+}
+
+func (c *connection) writer() {
+	for message := range c.send {
+		err := websocket.Message.Send(c.ws, message)
+		if err != nil {
+			break
+		}
+	}
+	c.ws.Close()
+}
 
 var (
 	homeTemplate = template.Must(template.ParseFiles("pages/home.html"))
 )
 
-func StartServer(port int,config *core.Config) {
+func StartServer(port int, config *core.Config) {
+	go r.run()
 	http.HandleFunc("/", homeHandler)
+	http.Handle("/ws", websocket.Handler(wsHandler))
 	addr := fmt.Sprintf(":%d", port)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Failed to run server: ", err)
@@ -38,4 +104,12 @@ func StartServer(port int,config *core.Config) {
 
 func homeHandler(c http.ResponseWriter, req *http.Request) {
 	homeTemplate.Execute(c, req.Host)
+}
+
+func wsHandler(ws *websocket.Conn) {
+	c := &connection{send: make(chan string, 256), ws: ws}
+	r.register <- c
+	defer func() { r.unregister <- c }()
+	go c.writer()
+	c.reader()
 }

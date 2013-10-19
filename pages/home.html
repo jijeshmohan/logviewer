@@ -4,11 +4,69 @@
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 
   <title>Log Viewer</title>
-  
+  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+<script type="text/javascript">
+    $(function() {
+
+    var conn;
+    var msg = $("#msg");
+    var log = $("#log");
+
+    function appendLog(msg) {
+        var d = log[0]
+        var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
+        msg.appendTo(log)
+        if (doScroll) {
+            d.scrollTop = d.scrollHeight - d.clientHeight;
+        }
+    }
+
+
+    if (window["WebSocket"]) {
+        conn = new WebSocket("ws://{{$}}/ws");
+        conn.onclose = function(evt) {
+            appendLog($("<div><b>Connection closed.</b></div>"))
+        }
+        conn.onmessage = function(evt) {
+            appendLog($("<div/>").text(evt.data))
+        }
+    } else {
+        appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+    }
+    });
+</script>
+<style type="text/css" media="all">
+  html{
+    overflow: hidden;
+  }
+  body{
+    overflow: hidden;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    background: gray;
+  }
+  header{
+    background-color:#222;
+    width:100%;
+    color:#fff;
+    height: 50px;
+  }
+  h2{ 
+    margin: 0;
+    padding: 8px 25px;
+    color: #eee;
+  }
+</style>
+
 </head>
 <body>
   <header>
-    Log Viewer
+    <h2>Log Viewer</h2> 
   </header>
+<div id='msg'>
+</div>
+<div id='log'></div>
 </body>
 </html>
