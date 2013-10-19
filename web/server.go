@@ -14,23 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package web
 
 import (
-	"flag"
 	"fmt"
-	"github.com/jijeshmohan/logviewer/core"
-	"github.com/jijeshmohan/logviewer/web"
+	"log"
+	"net/http"
+	"text/template"
+  "github.com/jijeshmohan/logviewer/core"
 )
 
 var (
-	port       = flag.Int("p", 8080, "webserver port")
-	configfile = flag.String("c", "./config.json", "configuration json file")
+	homeTemplate = template.Must(template.ParseFiles("pages/home.html"))
 )
 
-func main() {
-	flag.Parse()
-	config := core.GetConfig(*configfile)
-	fmt.Println(config.ServerName)
-	web.StartServer(*port, &config)
+func StartServer(port int,config *core.Config) {
+	http.HandleFunc("/", homeHandler)
+	addr := fmt.Sprintf(":%d", port)
+	if err := http.ListenAndServe(addr, nil); err != nil {
+		log.Fatal("Failed to run server: ", err)
+	}
+}
+
+func homeHandler(c http.ResponseWriter, req *http.Request) {
+	homeTemplate.Execute(c, req.Host)
 }
