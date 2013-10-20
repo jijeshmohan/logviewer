@@ -23,6 +23,7 @@ import (
 	"log"
 	"net/http"
 	"text/template"
+  "github.com/ActiveState/tail"
 )
 
 type connection struct {
@@ -73,7 +74,7 @@ func (c *connection) reader() {
 		if err != nil {
 			break
 		}
-		r.broadcast <- message
+		// r.broadcast <- message
 	}
 	c.ws.Close()
 }
@@ -97,6 +98,9 @@ func StartServer(port int, config *core.Config) {
 	http.HandleFunc("/", homeHandler)
 	http.Handle("/ws", websocket.Handler(wsHandler))
 	addr := fmt.Sprintf(":%d", port)
+  for _,log := range config.Logs {
+    go logFile(log)
+  }
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Failed to run server: ", err)
 	}
@@ -112,4 +116,11 @@ func wsHandler(ws *websocket.Conn) {
 	defer func() { r.unregister <- c }()
 	go c.writer()
 	c.reader()
+}
+
+func logFile(log core.Log) {
+	t, _ := tail.TailFile(log.Logpath, tail.Config{Follow: true, ReOpen: true})
+	for line := range t.Lines {
+		r.broadcast <- log.Appname + "  :  " + line.Text
+	}
 }

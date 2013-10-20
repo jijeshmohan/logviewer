@@ -27,7 +27,7 @@ type Config struct {
 
 type Log struct {
 	Appname string `json:"appName"`
-	LogPath string `json:"logPath"`
+	Logpath string `json:"logPath"`
 }
 
 func GetConfig(configfile string) Config {
