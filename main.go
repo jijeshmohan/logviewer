@@ -18,7 +18,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"github.com/jijeshmohan/logviewer/core"
 	"github.com/jijeshmohan/logviewer/web"
 )
@@ -31,6 +30,5 @@ var (
 func main() {
 	flag.Parse()
 	config := core.GetConfig(*configfile)
-	fmt.Println(config.ServerName)
 	web.StartServer(*port, &config)
 }

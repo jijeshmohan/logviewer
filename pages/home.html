@@ -2,33 +2,27 @@
 <html>
 <head>
   <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-
   <title>Log Viewer</title>
   <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript">
+  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/1.4.6/jquery.scrollTo.min.js"></script>
+ <script type="text/javascript">
     $(function() {
 
     var conn;
-    var msg = $("#msg");
-    var log = $("#log");
-
+    var log = $("#thread");
+     // Display a message
     function appendLog(msg) {
-        var d = log[0]
-        var doScroll = d.scrollTop == d.scrollHeight - d.clientHeight;
         msg.appendTo(log)
-        if (doScroll) {
-            d.scrollTop = d.scrollHeight - d.clientHeight;
-        }
+        $('#thread').scrollTo('max')
     }
 
-
-    if (window["WebSocket"]) {
-        conn = new WebSocket("ws://{{$}}/ws");
+   if (window["WebSocket"]) {
+        conn = new WebSocket("ws://{{.host}}/ws");
         conn.onclose = function(evt) {
-            appendLog($("<div><b>Connection closed.</b></div>"))
+            appendLog($("<div class='message'><p>Connection closed.</p></div>"))
         }
         conn.onmessage = function(evt) {
-            appendLog($("<div/>").text(evt.data))
+            appendLog($("<div class='message'><p>"+ evt.data +  "</p></div>"))
         }
     } else {
         appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
@@ -36,37 +30,68 @@
     });
 </script>
 <style type="text/css" media="all">
-  html{
-    overflow: hidden;
-  }
-  body{
-    overflow: hidden;
+html, body {
+    background: #000;
     padding: 0;
     margin: 0;
-    width: 100%;
-    height: 100%;
-    background: gray;
-  }
-  header{
-    background-color:#222;
-    width:100%;
-    color:#fff;
-    height: 50px;
-  }
-  h2{ 
+    font-family: Helvetica, Arial, Sans;
+}
+
+
+h1 {
+    background: #111;
     margin: 0;
-    padding: 8px 25px;
-    color: #eee;
-  }
+    color: #fff;
+    padding: 7px 14px;
+    font-size: 18px;
+    font-weight: normal;
+}
+  
+#thread {
+    position: fixed;
+    top: 40px;
+    left: 5px;
+    right: 5px;
+    bottom: 10px;
+    background: #222;
+    border-top: 1px solid #666;
+    padding: 10px;
+    overflow-y: scroll;
+    color:#1abc9c;
+}
+
+.message {
+    position: relative;
+}
+
+.message h2 {
+    background: #efefef;
+    color: #000;
+    font-size: 12px;
+    font-weight: bold;
+    margin: 0;
+    padding: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100px;
+    text-align: right;
+    border-right: 1px solid #ccc;
+}
+
+.message p {
+    font-size: 12px;
+    padding: 1px;
+    margin: 0 0 0 20px;
+}
 </style>
 
 </head>
 <body>
-  <header>
-    <h2>Log Viewer</h2> 
-  </header>
-<div id='msg'>
+<h1>Log Viewer</h1>
+<div id="thread">
+  
 </div>
-<div id='log'></div>
 </body>
 </html>

@@ -19,11 +19,11 @@ package web
 import (
 	"code.google.com/p/go.net/websocket"
 	"fmt"
+	"github.com/ActiveState/tail"
 	"github.com/jijeshmohan/logviewer/core"
 	"log"
 	"net/http"
 	"text/template"
-  "github.com/ActiveState/tail"
 )
 
 type connection struct {
@@ -98,16 +98,18 @@ func StartServer(port int, config *core.Config) {
 	http.HandleFunc("/", homeHandler)
 	http.Handle("/ws", websocket.Handler(wsHandler))
 	addr := fmt.Sprintf(":%d", port)
-  for _,log := range config.Logs {
-    go logFile(log)
-  }
+	for _, log := range config.Logs {
+		go logFile(log)
+	}
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Failed to run server: ", err)
 	}
 }
 
 func homeHandler(c http.ResponseWriter, req *http.Request) {
-	homeTemplate.Execute(c, req.Host)
+	data := make(map[string]interface{})
+	data["host"] = req.Host
+	homeTemplate.Execute(c, data)
 }
 
 func wsHandler(ws *websocket.Conn) {
