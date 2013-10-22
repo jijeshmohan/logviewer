@@ -123,6 +123,6 @@ func wsHandler(ws *websocket.Conn) {
 func logFile(log core.Log) {
 	t, _ := tail.TailFile(log.Logpath, tail.Config{Follow: true, ReOpen: true})
 	for line := range t.Lines {
-		r.broadcast <- log.Appname + "  :  " + line.Text
+		r.broadcast <- "{\"server\":\"" + log.Appname + "\",\"log\":\"" + line.Text + "\"}"
 	}
 }
