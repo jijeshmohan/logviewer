@@ -30,7 +30,7 @@ func ReadFile(filepath string) []byte {
 
 func checkError(err error, msg string) {
 	if err != nil {
-		fmt.Errorf(msg)
+		fmt.Println(msg, " ", err)
 		os.Exit(2)
 	}
 }
