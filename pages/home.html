@@ -11,7 +11,7 @@
     var conn;
     var log = $("#thread");
     var error_msg = new RegExp("ERROR");
-    var warn_msg = new RegExp("ERROR");
+    var warn_msg = new RegExp("WARN");
      // Display a message
      
     function appendLog(msg) {
@@ -29,7 +29,7 @@
         msg.appendTo(message)
         if (error_msg.test($(msg).text())) {
           message.addClass('error')
-        }else if (error_msg.test($(msg).text())){
+        }else if (warn_msg.test($(msg).text())){
           message.addClass('warn')  
         }
         $('#thread').scrollTo('max')
