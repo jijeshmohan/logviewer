@@ -26,20 +26,29 @@ import (
 	"text/template"
 )
 
+type MData struct {
+	Server string `json:"server"`
+	Msg    string `json:"msg"`
+}
+
+func (self *MData) String() string {
+	return self.Server + " says " + self.Msg
+}
+
 type connection struct {
 	ws   *websocket.Conn
-	send chan string
+	send chan *MData
 }
 
 type room struct {
 	connections map[*connection]bool
-	broadcast   chan string
+	broadcast   chan *MData
 	register    chan *connection
 	unregister  chan *connection
 }
 
 var r = room{
-	broadcast:   make(chan string),
+	broadcast:   make(chan *MData),
 	register:    make(chan *connection),
 	unregister:  make(chan *connection),
 	connections: make(map[*connection]bool),
@@ -69,8 +78,8 @@ func (r *room) run() {
 
 func (c *connection) reader() {
 	for {
-		var message string
-		err := websocket.Message.Receive(c.ws, &message)
+		var message MData
+		err := websocket.JSON.Receive(c.ws, &message)
 		if err != nil {
 			break
 		}
@@ -81,7 +90,7 @@ func (c *connection) reader() {
 
 func (c *connection) writer() {
 	for message := range c.send {
-		err := websocket.Message.Send(c.ws, message)
+		err := websocket.JSON.Send(c.ws, message)
 		if err != nil {
 			break
 		}
@@ -113,7 +122,7 @@ func homeHandler(c http.ResponseWriter, req *http.Request) {
 }
 
 func wsHandler(ws *websocket.Conn) {
-	c := &connection{send: make(chan string, 256), ws: ws}
+	c := &connection{send: make(chan *MData, 256), ws: ws}
 	r.register <- c
 	defer func() { r.unregister <- c }()
 	go c.writer()
@@ -123,6 +132,6 @@ func wsHandler(ws *websocket.Conn) {
 func logFile(log core.Log) {
 	t, _ := tail.TailFile(log.Logpath, tail.Config{Follow: true, ReOpen: true})
 	for line := range t.Lines {
-		r.broadcast <- "{\"server\":\"" + log.Appname + "\",\"log\":\"" + line.Text + "\"}"
+		r.broadcast <- &MData{Server: log.Appname, Msg: line.Text}
 	}
 }

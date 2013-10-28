@@ -22,7 +22,7 @@
 
     function appendLogWithJSON(data) {
         var jsobj = $.parseJSON(data);
-        var msg = $("<p/>").text(jsobj.log)
+        var msg = $("<p/>").text(jsobj.msg)
         var server = $("<h2/>").text(jsobj.server)   
         var message = $("<div class='message'/>").appendTo(log)
         server.appendTo(message)
