@@ -104,7 +104,7 @@ var (
 
 func StartServer(port int, config *core.Config) {
 	go r.run()
-	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/", handleHomePage(config))
 	http.Handle("/ws", websocket.Handler(wsHandler))
 	addr := fmt.Sprintf(":%d", port)
 	for _, log := range config.Logs {
@@ -115,10 +115,14 @@ func StartServer(port int, config *core.Config) {
 	}
 }
 
-func homeHandler(c http.ResponseWriter, req *http.Request) {
-	data := make(map[string]interface{})
-	data["host"] = req.Host
-	homeTemplate.Execute(c, data)
+func handleHomePage(config *core.Config) func(http.ResponseWriter, *http.Request) {
+	return func(c http.ResponseWriter, req *http.Request) {
+		data := make(map[string]interface{})
+		data["host"] = req.Host
+		data["logs"] = config.Logs
+		data["server"] = config.ServerName
+		homeTemplate.Execute(c, data)
+	}
 }
 
 func wsHandler(ws *websocket.Conn) {

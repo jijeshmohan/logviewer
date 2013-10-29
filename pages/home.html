@@ -17,11 +17,15 @@
     function appendLog(msg) {
         var message = $("<div class='message'/>").appendTo(log)
         msg.appendTo(message)
-        $('#thread').scrollTo('max')
+        $('#thread').scrollTo('max',{'axis':'y'})
     }
 
     function appendLogWithJSON(data) {
         var jsobj = $.parseJSON(data);
+        var shouldDisplay = $("#server_" + jsobj.server).is(':checked');
+        if (!shouldDisplay){
+            return;
+        }
         var msg = $("<p/>").text(jsobj.msg)
         var server = $("<h2/>").text(jsobj.server)   
         var message = $("<div class='message'/>").appendTo(log)
@@ -63,8 +67,16 @@ h1 {
     padding: 7px 14px;
     font-size: 18px;
     font-weight: normal;
+    float: left;
+    width: 50%;
 }
   
+.apps{
+    padding: 7px;
+   float: right;
+   color:#eee;
+   font-size: small;
+}
 #thread {
     position: fixed;
     top: 40px;
@@ -112,7 +124,12 @@ h1 {
 
 </head>
 <body>
-<h1>Log Viewer</h1>
+<div>
+<h1>Log Viewer - {{.server}}</h1>
+{{range .logs}}
+    <div class="apps"><input type="checkbox" id="server_{{.Appname}}" checked="true"> {{.Appname}}</div>
+{{end}}
+</div>
 <div id="thread">
 </div>
 </body>
