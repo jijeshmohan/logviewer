@@ -24,6 +24,6 @@ Modify the **config.json** file with logs to be monitored and run the logviewer 
 
 ```
 -p port 				: Specify the webserver port ( default to 8080)
--c configfilename 	  : Configuration file name (default to config.json)
+-c configfilename 	    : Configuration file name (default to config.json)
 ```
 
