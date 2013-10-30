@@ -14,7 +14,7 @@ go get github.com/jijeshmohan/logviewer
 ```
 2. **Install from binary**
 
-	available soon....
+  [Linux 64bit](https://www.dropbox.com/s/jze8uukli1h053m/logviewer_linux_x64.tar.gz)
 
 #### Running
 
