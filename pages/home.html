@@ -20,6 +20,10 @@
         $('#thread').scrollTo('max',{'axis':'y'})
     }
 
+    $("#clear").click(function () {
+        $("#thread").empty();
+    });
+
     function appendLogWithJSON(data) {
         var jsobj = $.parseJSON(data);
         var shouldDisplay = $("#server_" + jsobj.server).is(':checked');
@@ -125,10 +129,11 @@ h1 {
 </head>
 <body>
 <div>
-<h1>Log Viewer - {{.server}}</h1>
-{{range .logs}}
-    <div class="apps"><input type="checkbox" id="server_{{.Appname}}" checked="true"> {{.Appname}}</div>
-{{end}}
+    <h1>Log Viewer - {{.server}}</h1>
+    {{range .logs}}
+        <div class="apps"><input type="checkbox" id="server_{{.Appname}}" checked="true"> {{.Appname}}</div>
+    {{end}}
+    <div class="apps"> <button id="clear" >clear</button></div>
 </div>
 <div id="thread">
 </div>
