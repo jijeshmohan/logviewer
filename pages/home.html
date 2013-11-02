@@ -17,7 +17,7 @@
     function appendLog(msg) {
         var message = $("<div class='message'/>").appendTo(log)
         msg.appendTo(message)
-        $('#thread').scrollTo('max',{'axis':'y'})
+       $('#thread').scrollTo('max',{axis:'y'})
     }
 
     $("#clear").click(function () {
@@ -40,7 +40,7 @@
         }else if (warn_msg.test($(msg).text())){
           message.addClass('warn')  
         }
-        $('#thread').scrollTo('max')
+       $('#thread').scrollTo('max',{axis:'y'})
     }
    if (window["WebSocket"]) {
         conn = new WebSocket("ws://"+ window.location.host +"/ws");
