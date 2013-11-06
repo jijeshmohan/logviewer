@@ -60,8 +60,10 @@ func (r *room) run() {
 		case c := <-r.register:
 			r.connections[c] = true
 		case c := <-r.unregister:
-			delete(r.connections, c)
-			close(c.send)
+			if _, ok := r.connections[c]; ok {
+				delete(r.connections, c)
+				close(c.send)
+			}
 		case m := <-r.broadcast:
 			for c := range r.connections {
 				select {
