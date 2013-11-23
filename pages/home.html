@@ -1,141 +1,216 @@
 <!doctype html>
 <html>
+
 <head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-  <title>Log Viewer</title>
-  <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-  <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/1.4.6/jquery.scrollTo.min.js"></script>
- <script type="text/javascript">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Log Viewer</title>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/1.4.6/jquery.scrollTo.min.js"></script>
+    <script type="text/javascript">
     $(function() {
 
-    var conn;
-    var log = $("#thread");
-    var error_msg = new RegExp("ERROR");
-    var warn_msg = new RegExp("WARN");
-     // Display a message
-     
-    function appendLog(msg) {
-        var message = $("<div class='message'/>").appendTo(log)
-        msg.appendTo(message)
-       $('#thread').scrollTo('max',{axis:'y'})
-    }
+        var conn;
+        var log = $("#thread");
+        var error_msg = new RegExp("ERROR");
+        var warn_msg = new RegExp("WARN");
+        // Display a message
 
-    $("#clear").click(function () {
-        $("#thread").empty();
+        function appendLog(msg) {
+            var message = $("<div class='message'/>").appendTo($(".tab"))
+            msg.appendTo(message)
+            $('#thread').scrollTo('max', {
+                axis: 'y'
+            })
+        }
+
+        $("#clear").click(function() {
+            $("#thread > div.tab").empty();
+        });
+
+        $("#tab_links a").click(function() {
+            $("#tab_links a").removeClass("active");
+            $(this).addClass("active")
+
+            var tabId= $(this).attr("data-tab");
+            $("#thread > div.tab").removeClass('selected')
+            $(tabId).addClass("selected");
+        })
+
+        function appendLogWithJSON(data) {
+            var jsobj = $.parseJSON(data);
+            var shouldDisplay = $("#server_" + jsobj.server).is(':checked');
+            if (!shouldDisplay) {
+                return;
+            }
+            var msg = $("<p/>").text(jsobj.msg)
+            var server = $("<h2/>").text(jsobj.server)
+            var message = $("<div class='message'/>").appendTo($("#"+jsobj.server))
+            server.appendTo(message)
+            msg.appendTo(message)
+            if (error_msg.test($(msg).text())) {
+                message.addClass('error')
+            } else if (warn_msg.test($(msg).text())) {
+                message.addClass('warn')
+            }
+            $('#thread').scrollTo('max', {
+                axis: 'y'
+            })
+        }
+        if (window["WebSocket"]) {
+            conn = new WebSocket("ws://" + window.location.host + "/ws");
+            conn.onclose = function(evt) {
+                appendLog($("<div class='message'><p>Connection closed.</p></div>"))
+            }
+            conn.onmessage = function(evt) {
+                appendLogWithJSON(evt.data);
+            }
+        } else {
+            appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+        }
+
+        $($("#tab_links a")[0]).addClass('active');
+        $($("#thread div.tab")[0]).addClass('selected');
     });
-
-    function appendLogWithJSON(data) {
-        var jsobj = $.parseJSON(data);
-        var shouldDisplay = $("#server_" + jsobj.server).is(':checked');
-        if (!shouldDisplay){
-            return;
-        }
-        var msg = $("<p/>").text(jsobj.msg)
-        var server = $("<h2/>").text(jsobj.server)   
-        var message = $("<div class='message'/>").appendTo(log)
-        server.appendTo(message)
-        msg.appendTo(message)
-        if (error_msg.test($(msg).text())) {
-          message.addClass('error')
-        }else if (warn_msg.test($(msg).text())){
-          message.addClass('warn')  
-        }
-       $('#thread').scrollTo('max',{axis:'y'})
+    </script>
+    <style type="text/css" media="all">
+    html, body {
+        background: #000;
+        padding: 0;
+        margin: 0;
+        font-family: Helvetica, Arial, Sans;
     }
-   if (window["WebSocket"]) {
-        conn = new WebSocket("ws://"+ window.location.host +"/ws");
-        conn.onclose = function(evt) {
-            appendLog($("<div class='message'><p>Connection closed.</p></div>"))
-        }
-        conn.onmessage = function(evt) {
-           appendLogWithJSON(evt.data); 
-        }
-    } else {
-        appendLog($("<div><b>Your browser does not support WebSockets.</b></div>"))
+    h1 {
+        background: #111;
+        margin: 0;
+        color: #fff;
+        padding: 7px 14px;
+        font-size: 18px;
+        font-weight: normal;
+        float: left;
+        width: 50%;
     }
-    });
-</script>
-<style type="text/css" media="all">
-html, body {
-    background: #000;
-    padding: 0;
-    margin: 0;
-    font-family: Helvetica, Arial, Sans;
-}
-
-
-h1 {
-    background: #111;
-    margin: 0;
-    color: #fff;
-    padding: 7px 14px;
-    font-size: 18px;
-    font-weight: normal;
-    float: left;
-    width: 50%;
-}
-  
-.apps{
-    padding: 7px;
-   float: right;
-   color:#eee;
-   font-size: small;
-}
-#thread {
-    position: fixed;
-    top: 40px;
-    left: 5px;
-    right: 5px;
-    bottom: 10px;
-    background: #222;
-    border-top: 1px solid #666;
-    padding: 10px 10px 10px 1px;
-    overflow-y: scroll;
-    color:#1abc9c;
-}
-
-.message {
-    position: relative;
-}
-
-.message h2 {
-    background: #222;
-    color: #ecf0f1;
-    font-size: 11px;
-    margin: 0;
-    padding: 1px 3px 1px 1px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    width: 100px;
-    text-align: right;
-    border-right: 1px solid #ecf0f1;
-}
-
-.message p {
-    font-size: 12px;
-    padding: 1px;
-    margin: 0 0 0 110px;
-}
-.warn{
-     color: #f1c40f;
-}
-.error{
-  color: #c0392b;
-}
-</style>
+    .apps {
+        padding: 7px;
+        float: right;
+        color:#eee;
+        font-size: small;
+    }
+    #thread {
+        position: fixed;
+        top: 65px;
+        left: 5px;
+        right: 5px;
+        bottom: 10px;
+        background: #222;
+        padding: 10px 10px 10px 1px;
+        overflow-y: scroll;
+        color:#1abc9c;
+    }
+    .tab {
+        display: none;
+    }
+    .message {
+        position: relative;
+    }
+    .message h2 {
+        background: #222;
+        color: #ecf0f1;
+        font-size: 11px;
+        margin: 0;
+        padding: 1px 3px 1px 1px;
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 100px;
+        text-align: right;
+        border-right: 1px solid #ecf0f1;
+    }
+    .message p {
+        font-size: 12px;
+        padding: 1px;
+        margin: 0 0 0 110px;
+    }
+    .warn {
+        color: #f1c40f;
+    }
+    .error {
+        color: #c0392b;
+    }
+    .tabs {
+        display: block;
+        clear: both;
+        padding-left: 10px;
+        padding-top: 5px;
+        border-top: 1px solid #555;
+    }
+    ul {
+        margin: 0;
+        padding: 0;
+        display: table;
+        table-layout: fixed;
+        text-align: center;
+    }
+    li {
+        display: table-cell;
+        width: 25%;
+        padding-right: 5px;
+        height: auto;
+        vertical-align: bottom;
+    }
+    li a {
+        cursor: pointer;
+        display: block;
+        min-height: 100%;
+        padding: 4px 10px;
+        background-color: #444;
+        color: #aaa;
+        font-size: 14px;
+        border-radius: 6px 6px 0 0;
+        text-decoration: none;
+    }
+    li a:hover {
+        background-color: #222;
+        text-decoration: underline;
+    }
+    li a.active {
+        background-color: #222;
+        color: white;
+        border: 1px solid rgb(141, 136, 136);
+        border-bottom: none;
+    }
+    .selected{
+        display: block;
+    }
+    </style>
 
 </head>
+
 <body>
-<div>
-    <h1>Log Viewer - {{.server}}</h1>
-    {{range .logs}}
-        <div class="apps"><input type="checkbox" id="server_{{.Appname}}" checked="true"> {{.Appname}}</div>
-    {{end}}
-    <div class="apps"> <button id="clear" >clear</button></div>
-</div>
-<div id="thread">
-</div>
+    <div>
+        <h1>Log Viewer - {{.server}}</h1>
+        <span id="msg"></span>
+        {{range .logs}}
+        <div class="apps">
+            <input type="checkbox" id="server_{{.Appname}}" checked="true">{{.Appname}}</div>
+        {{end}}
+        <div class="apps">
+            <button id="clear">clear</button>
+        </div>
+    </div>
+    <div class="tabs">
+        <ul id="tab_links">
+            {{range .logs}}
+                 <li><a data-tab="#{{.Appname}}">{{.Appname}}</a></li>
+            {{end}}
+        </ul>
+    </div>
+    <div id="thread">
+        {{range .logs}}
+        <div class="tab" id="{{.Appname}}">
+        </div>
+        {{end}}
+    </div>
 </body>
+
 </html>
