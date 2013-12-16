@@ -29,3 +29,6 @@ Modify the **config.json** file with logs to be monitored and run the logviewer 
 -c configfilename 	    : Configuration file name (default to config.json)
 ```
 
+### Inspiration 
+
+[Logio](http://logio.org/)
