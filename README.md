@@ -1,6 +1,6 @@
 ## Logviewer
 
-[Logviewer](https://github.com/jijeshmohan/logviewer) is a realtime log monitoring in browser. Tool helps to monitor all the logs without connecting to the server.
+[Logviewer](https://github.com/jijeshmohan/logviewer) is a realtime log monitoring in browser. Tool helps to monitor all the logs without connecting(ssh connections) to the server.
 
 
 #### Install Logviewer
