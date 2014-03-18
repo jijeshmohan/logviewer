@@ -17,18 +17,18 @@ limitations under the License.
 package main
 
 import (
-	"flag"
-	"github.com/jijeshmohan/logviewer/core"
-	"github.com/jijeshmohan/logviewer/web"
+  "./core"
+  "./web"
+  "flag"
 )
 
 var (
-	port       = flag.Int("p", 8080, "webserver port")
-	configfile = flag.String("c", "./config.json", "configuration json file")
+  port       = flag.Int("p", 8080, "webserver port")
+  configfile = flag.String("c", "./config.json", "configuration json file")
 )
 
 func main() {
-	flag.Parse()
-	config := core.GetConfig(*configfile)
-	web.StartServer(*port, &config)
+  flag.Parse()
+  config := core.GetConfig(*configfile)
+  web.StartServer(*port, &config)
 }
