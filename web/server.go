@@ -113,6 +113,7 @@ func StartServer(port int, config *core.Config) {
 	for _, log := range config.Logs {
 		go logFile(log)
 	}
+	fmt.Println("Starting server at ", addr)
 	if err := http.ListenAndServe(addr, nil); err != nil {
 		log.Fatal("Failed to run server: ", err)
 	}
