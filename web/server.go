@@ -102,10 +102,15 @@ func (c *connection) writer() {
 }
 
 var (
-	homeTemplate = template.Must(template.ParseFiles("pages/home.html"))
+	homeTemplate *template.Template
 )
 
 func StartServer(port int, config *core.Config) {
+	page, err := Asset("pages/home.html")
+	if err != nil {
+		panic("Unable to read home.html")
+	}
+	homeTemplate = template.Must(template.New("index.html").Parse(string(page)))
 	go r.run()
 	http.HandleFunc("/", handleHomePage(config))
 	http.HandleFunc("/ws", handleWebsoket)
