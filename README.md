@@ -14,9 +14,10 @@ go get github.com/jijeshmohan/logviewer
 ```
 2. **Install from binary**
 
-  Linux [32bit](https://www.dropbox.com/s/5unjcsd0amty38o/logviewer_linux_x86.zip) | [64bit](https://www.dropbox.com/s/uqqf3yz55fna6md/logviewer_linux_x64.zip)
-  
-  Mac [64bit](https://www.dropbox.com/s/iz2z0h4p7ueh82h/logviewer_mac_x64.zip)
+ Linux & Mac Binaries available
+ 
+ [Download] (https://github.com/jijeshmohan/logviewer/releases/tag/v0.2)
+ 
 
 #### Running
 
